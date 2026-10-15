@@ -9883,6 +9883,60 @@ lsquic_ietf_full_conn_test_stop_sending_critical (unsigned results[4])
 
 #ifndef NDEBUG
 void
+lsquic_ietf_full_conn_test_preferred_address_path (void)
+{
+    struct ietf_full_conn conn;
+    struct lsquic_engine_public enpub;
+    struct transport_params params;
+    struct sockaddr_in local, peer, alternate;
+    unsigned char path_id;
+
+    memset(&conn, 0, sizeof(conn));
+    memset(&enpub, 0, sizeof(enpub));
+    memset(&params, 0, sizeof(params));
+    memset(&local, 0, sizeof(local));
+    memset(&peer, 0, sizeof(peer));
+    memset(&alternate, 0, sizeof(alternate));
+
+    assert(0 == lsquic_mm_init(&enpub.enp_mm));
+    enpub.enp_settings.es_allow_migration = 1;
+    conn.ifc_enpub = &enpub;
+    conn.ifc_pub.mm = &enpub.enp_mm;
+    conn.ifc_settings = &enpub.enp_settings;
+    conn.ifc_conn.cn_version = LSQVER_I001;
+
+    local.sin_family = AF_INET;
+    local.sin_addr.s_addr = htonl(0x7F000001);
+    local.sin_port = htons(12345);
+    peer.sin_family = AF_INET;
+    peer.sin_addr.s_addr = htonl(0x7F000002);
+    peer.sin_port = htons(443);
+    alternate.sin_family = AF_INET;
+    alternate.sin_addr.s_addr = htonl(0x7F000003);
+    alternate.sin_port = htons(443);
+
+    record_to_path(&conn, &conn.ifc_paths[0], NULL,
+                    (struct sockaddr *) &local, (struct sockaddr *) &peer);
+    conn.ifc_used_paths = 1 << 0;
+    path_id = ietf_full_conn_ci_record_addrs(&conn.ifc_conn, NULL,
+                    (struct sockaddr *) &local,
+                    (struct sockaddr *) &alternate);
+    assert(path_id == 1);
+    assert(conn.ifc_used_paths & (1 << 1));
+
+    params.tp_set = 1 << TPI_PREFERRED_ADDRESS;
+    params.tp_preferred_address.ipv4_addr[0] = 127;
+    params.tp_preferred_address.ipv4_addr[3] = 4;
+    params.tp_preferred_address.ipv4_port = 8443;
+    params.tp_preferred_address.cid.len = 1;
+    params.tp_preferred_address.cid.idbuf[0] = 0xC0;
+
+    (void) try_to_begin_migration(&conn, &params);
+    lsquic_mm_cleanup(&enpub.enp_mm);
+}
+
+
+void
 lsquic_ietf_full_conn_test_conn_close (unsigned results[13])
 {
     enum {
