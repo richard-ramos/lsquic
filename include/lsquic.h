@@ -259,8 +259,10 @@ struct lsxpack_header;
  * constructor.
  */
 
-/* `sni' may be NULL if engine is not HTTP mode and client TLS transport
- * parameters did not include the SNI.
+/** Select a server certificate context. Return NULL to reject the connection.
+ * If the client omits SNI, `sni' may be NULL for non-HTTP engines, or for
+ * HTTP/3 engines with es_allow_no_sni enabled. In that case, select a
+ * suitable default certificate context or return NULL to reject.
  */
 typedef struct ssl_ctx_st * (*lsquic_lookup_cert_f)(
     void *lsquic_cert_lookup_ctx, const struct sockaddr *local, const char *sni);
@@ -1270,8 +1272,7 @@ struct lsquic_engine_settings {
 
     /** Allow HTTP/3 server certificate lookup without an SNI hostname.
      * Values are 0 and 1. Default: 0 (require SNI).
-     * When enabled, ea_lookup_cert may receive NULL for the hostname and
-     * must select a default certificate or reject the connection.
+     * See @ref lsquic_lookup_cert_f for the NULL-hostname callback contract.
      * Does not change client certificate verification or non-HTTP behavior.
      */
     int             es_allow_no_sni;
