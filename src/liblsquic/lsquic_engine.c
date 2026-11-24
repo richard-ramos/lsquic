@@ -542,6 +542,13 @@ lsquic_engine_check_settings (const struct lsquic_engine_settings *settings,
         return -1;
     }
 
+    if (settings->es_allow_no_sni != 0 && settings->es_allow_no_sni != 1)
+    {
+        if (err_buf)
+            snprintf(err_buf, err_buf_sz, "es_allow_no_sni must be 0 or 1");
+        return -1;
+    }
+
 #if LSQUIC_WEBTRANSPORT_SERVER_SUPPORT
     if(settings->es_webtransport_server)
     {

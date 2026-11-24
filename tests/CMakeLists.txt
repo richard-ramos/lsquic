@@ -37,6 +37,7 @@ SET(TESTS
     bbr3
     bw_sampler
     cert_chain
+    sni
     conn_close_gquic_be
     conn_close_ietf
     crypto_gen

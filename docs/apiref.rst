@@ -690,6 +690,18 @@ settings structure:
 
        IETF QUIC only.
 
+    .. member:: int             es_allow_no_sni
+
+       Allow HTTP/3 server certificate lookup when the client omits SNI.
+       Allowed values are 0 and 1. The default is 0, preserving rejection
+       of HTTP/3 handshakes without SNI.
+
+       When enabled, ``ea_lookup_cert`` may receive a NULL hostname. The
+       application must choose a default certificate or return NULL to reject
+       the connection. This supports clients connecting to IP-address URLs
+       without changing client certificate verification. Non-HTTP connections
+       and connections carrying SNI retain their existing behavior.
+
     .. member:: unsigned        es_scid_len
 
        Source Connection ID length.  Valid values are 0 through 20, inclusive.

@@ -1267,6 +1267,14 @@ struct lsquic_engine_settings {
      * Default value is @ref LSQUIC_DF_PING_WITHOUT_STREAMS.
      */
     int             es_ping_without_streams;
+
+    /** Allow HTTP/3 server certificate lookup without an SNI hostname.
+     * Values are 0 and 1. Default: 0 (require SNI).
+     * When enabled, ea_lookup_cert may receive NULL for the hostname and
+     * must select a default certificate or reject the connection.
+     * Does not change client certificate verification or non-HTTP behavior.
+     */
+    int             es_allow_no_sni;
 };
 
 /* Initialize `settings' to default values */
